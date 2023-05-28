@@ -20,7 +20,6 @@ describe('users endpoints', () => {
             payload: {
                 firstName: 'test-first-name',
                 lastName: 'test-last-name',
-                username: 'test-username',
                 email: `test-${Date.now()}@prisma.io`,
             },
         })
@@ -38,6 +37,7 @@ describe('users endpoints', () => {
             method: 'POST',
             url: '/users',
             payload: {
+                // firstName: 'test-first-name',
                 lastName: 'test-last-name',
                 email: `test-${Date.now()}@prisma.io`,
             },
