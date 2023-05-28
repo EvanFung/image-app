@@ -3,6 +3,7 @@ import de from 'date-fns/locale/de';
 import Joi from 'joi'
 import Boom from '@hapi/boom'
 import { API_AUTH_STATEGY } from './auth'
+import { isRequestedUserOrAdmin } from '../auth-helpers';
 
 const usersPlugin = {
     name: 'app/users',
@@ -193,26 +194,4 @@ async function updateUserHandler(request: Hapi.Request, h: Hapi.ResponseToolkit)
         request.log('error', err)
         return Boom.badImplementation('failed to update user')
     }
-}
-
-
-// Pre-function to check if the authenticated user matches the requested user
-export async function isRequestedUserOrAdmin(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-    // 👇 userId and isAdmin are populated by the `validateAPIToken` function
-    const { userId, isAdmin } = request.auth.credentials
-
-    if (isAdmin) {
-        // If the user is an admin allow
-        return h.continue
-    }
-
-    const requestedUserId = parseInt(request.params.userId, 10)
-
-    // 👇 Check that the requested userId matches the authenticated userId
-    if (requestedUserId === userId) {
-        return h.continue
-    }
-
-    // The authenticated user is not authorized
-    throw Boom.forbidden()
 }
