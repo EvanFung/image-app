@@ -46,24 +46,43 @@ const imagesPlugin = {
                         },
                     }
                 }
+            },
+            {
+                method: 'GET',
+                path: '/images',
+                handler: getImagesHandler,
+                options: {
+                    auth: {
+                        mode: 'required',
+                        strategy: API_AUTH_STATEGY,
+                    },
+                }
+            },
+            {
+                method: 'DELETE',
+                path: '/images/{imageId}',
+                handler: deleteImageHandler,
+                options: {
+                    auth: {
+                        mode: 'required',
+                        strategy: API_AUTH_STATEGY,
+                    },
+                    validate: {
+                        params: Joi.object({
+                            imageId: Joi.number().integer(),
+                        }),
+                        failAction: (request, h, err) => {
+                            // show validation errors to user
+                            throw err
+                        },
+                    },
+                }
             }
         ]);
     }
 }
 
 export default imagesPlugin
-
-const imageValidator = Joi.object({
-    imageUrl: Joi.string().alter({
-        create: (schema) => schema.required(),
-        update: (schema) => schema.optional(),
-    })
-})
-
-const createImageValidator = imageValidator.tailor('create')
-const updateImageValidator = imageValidator.tailor('update')
-
-
 
 
 async function createImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
@@ -124,6 +143,51 @@ async function getImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
     } catch (err: any) {
         request.log(err)
         throw Boom.badImplementation('failed to get image')
+    }
+}
+
+//get all images for a user
+async function getImagesHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    const { prisma } = request.server.app
+    const { userId } = request.auth.credentials
+
+    try {
+        const images = await prisma.image.findMany({
+            where: {
+                userId: userId
+            },
+            select: {
+                id: true,
+                imageUrl: true,
+            }
+        })
+        if (!images) {
+            return h.response().code(404)
+        }
+        return h.response(images).code(200)
+    } catch (err: any) {
+        request.log('error', err)
+        return Boom.badImplementation('failed to get images')
+    }
+}
+
+//delete an image
+async function deleteImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    const { prisma } = request.server.app
+    const imageId = parseInt(request.params.imageId, 10)
+    const { userId } = request.auth.credentials
+
+    try {
+        await prisma.image.delete({
+            where: {
+                id: imageId,
+            }
+        });
+        return h.response().code(204)
+    }
+    catch (err: any) {
+        request.log('error', err)
+        return Boom.badImplementation('failed to delete image')
     }
 
 }
