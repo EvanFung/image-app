@@ -26,6 +26,26 @@ const imagesPlugin = {
                     }
                 },
                 handler: createImageHandler,
+            },
+            {
+                method: 'GET',
+                path: '/images/{imageId}',
+                handler: getImageHandler,
+                options: {
+                    auth: {
+                        mode: 'required',
+                        strategy: API_AUTH_STATEGY,
+                    },
+                    validate: {
+                        params: Joi.object({
+                            imageId: Joi.number().integer(),
+                        }),
+                        failAction: (request, h, err) => {
+                            // show validation errors to user https://github.com/hapijs/hapi/issues/3706
+                            throw err
+                        },
+                    }
+                }
             }
         ]);
     }
@@ -52,11 +72,6 @@ async function createImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit
     const data = request.payload as any
     try {
         if (data['image']) {
-            // const name = Date.now() + '-' + data['image'].hapi.filename;
-            // const filePath = `./uploads/${name}`;
-            // const file = fs.createWriteStream(filePath);
-            // await data['image'].pipe(file);
-            // return h.response('Image uploaded successfully.');
             const name = Date.now() + '-' + data['image'].hapi.filename;
             const file = data['image']
 
@@ -66,7 +81,7 @@ async function createImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit
                 chunks.push(chunk)
             }
             const buffer = Buffer.concat(chunks)
-            //upload the image and get the url
+            //upload the image to aws s3 and get the url
             const imageUrl = await uploadImage(buffer, name)
             //create the image in the database
             const result = await prisma.image.create({
@@ -85,6 +100,30 @@ async function createImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit
     } catch (err: any) {
         request.log(err)
         throw Boom.badImplementation('failed to upload image')
+    }
+
+}
+
+async function getImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    const { prisma } = request.server.app
+    const imageId = parseInt(request.params.imageId, 10)
+    try {
+        const image = await prisma.image.findUnique({
+            where: {
+                id: imageId
+            },
+            include: {
+                user: true
+            }
+        })
+        if (!image) {
+            return h.response().code(404)
+        } else {
+            return h.response(image).code(200)
+        }
+    } catch (err: any) {
+        request.log(err)
+        throw Boom.badImplementation('failed to get image')
     }
 
 }
