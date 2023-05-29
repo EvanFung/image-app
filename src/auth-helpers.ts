@@ -22,3 +22,14 @@ export async function isRequestedUserOrAdmin(
     // The authenticated user is not authorized
     throw Boom.forbidden()
 }
+
+// Pre function to check if the authenticated user matches the requested user
+export async function isAdmin(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    if (request.auth.credentials.isAdmin) {
+        // If the user is an admin allow
+        return h.continue
+    }
+
+    // The authenticated user is not a teacher
+    throw Boom.forbidden()
+}

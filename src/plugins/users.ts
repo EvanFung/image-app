@@ -15,6 +15,10 @@ const usersPlugin = {
                 path: '/users',
                 handler: createUserHandler,
                 options: {
+                    // auth: {
+                    //     mode: 'required',
+                    //     strategy: API_AUTH_STATEGY,
+                    // },
                     validate: {
                         payload: createUserValidator,
                         failAction: (request, h, err) => {
@@ -30,11 +34,11 @@ const usersPlugin = {
 
                 handler: getUserHandler,
                 options: {
-                    pre: [isRequestedUserOrAdmin],
-                    auth: {
-                        mode: 'required',
-                        strategy: API_AUTH_STATEGY,
-                    },
+                    // pre: [isRequestedUserOrAdmin],
+                    // auth: {
+                    //     mode: 'required',
+                    //     strategy: API_AUTH_STATEGY,
+                    // },
                     validate: {
                         params: Joi.object({
                             userId: Joi.number().integer(),
@@ -47,6 +51,11 @@ const usersPlugin = {
                 path: '/users/{userId}',
                 handler: deleteUserHandler,
                 options: {
+                    // pre: [isRequestedUserOrAdmin],
+                    // auth: {
+                    //     mode: 'required',
+                    //     strategy: API_AUTH_STATEGY,
+                    // },
                     validate: {
                         params: Joi.object({
                             userId: Joi.number().integer(),
@@ -59,12 +68,19 @@ const usersPlugin = {
                 path: '/users/{userId}',
                 handler: updateUserHandler,
                 options: {
+                    pre: [isRequestedUserOrAdmin],
+                    auth: {
+                        mode: 'required',
+                        strategy: API_AUTH_STATEGY,
+                    },
                     validate: {
                         params: Joi.object({
                             userId: Joi.number().integer(),
                         }),
                         payload: updateUserValidator,
                     },
+
+
                 }
             },
 

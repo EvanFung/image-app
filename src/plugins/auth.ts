@@ -23,12 +23,13 @@ const authPlugin: Hapi.Plugin<null> = {
                 'The JWT_SECRET env var is not set. This is unsafe! If running in production, set it.',
             )
         }
-
         server.auth.strategy(API_AUTH_STATEGY, 'jwt', {
             key: JWT_SECRET,
             verifyOptions: { algorithms: [JWT_ALGORITHM] },
             validate: validateAPIToken,
         })
+        // Require by default API token unless otherwise configured
+        server.auth.default(API_AUTH_STATEGY)
 
 
         // TODO: Add the authentication strategy
@@ -80,7 +81,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'SUPER_SECRET_JWT_SECRET'
 
 const JWT_ALGORITHM = 'HS256'
 
-const AUTHENTICATION_TOKEN_EXPIRATION_HOURS = 12
+const AUTHENTICATION_TOKEN_EXPIRATION_HOURS = 99
 
 const apiTokenSchema = Joi.object({
     tokenId: Joi.number().integer().required(),

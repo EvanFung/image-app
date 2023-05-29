@@ -7,6 +7,7 @@ import usersPlugin from './plugins/users'
 import emailPlugin from './plugins/email'
 import hapiAuthJWT from 'hapi-auth-jwt2'
 import authPlugin from './plugins/auth'
+import imagesPlugin from './plugins/images'
 
 dotenv.config()
 const server: Hapi.Server = Hapi.server({
@@ -26,12 +27,13 @@ export async function createServer(): Promise<Hapi.Server> {
     })
 
     await server.register([
-        statusPlugin,
+        hapiAuthJWT,
+        authPlugin,
         prismaPlugin,
         usersPlugin,
         emailPlugin,
-        hapiAuthJWT,
-        authPlugin,
+        imagesPlugin,
+        statusPlugin,
     ])
     await server.initialize()
 

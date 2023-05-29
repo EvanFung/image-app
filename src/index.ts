@@ -1,4 +1,7 @@
 import { createServer, startServer } from './server'
+import * as AWS from 'aws-sdk'
+
+
 
 createServer()
     .then(startServer)
