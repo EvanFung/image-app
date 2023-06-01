@@ -149,13 +149,25 @@ describe('users endpoints', () => {
         expect(response.statusCode).toEqual(400)
     })
 
-    test('delete user', async () => {
+    test('delete authenticated user', async () => {
         const response = await server.inject({
             method: 'DELETE',
             url: `/users/${testUserCredentials.userId}`,
             auth: {
                 strategy: API_AUTH_STATEGY,
                 credentials: testUserCredentials,
+            },
+        })
+        expect(response.statusCode).toEqual(204)
+    })
+
+    test('delete user as an admin', async () => {
+        const response = await server.inject({
+            method: 'DELETE',
+            url: `/users/${userId}`,
+            auth: {
+                strategy: API_AUTH_STATEGY,
+                credentials: testAdminCredentials,
             },
         })
         expect(response.statusCode).toEqual(204)

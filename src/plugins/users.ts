@@ -51,11 +51,11 @@ const usersPlugin = {
                 path: '/users/{userId}',
                 handler: deleteUserHandler,
                 options: {
-                    // pre: [isRequestedUserOrAdmin],
-                    // auth: {
-                    //     mode: 'required',
-                    //     strategy: API_AUTH_STATEGY,
-                    // },
+                    pre: [isRequestedUserOrAdmin],
+                    auth: {
+                        mode: 'required',
+                        strategy: API_AUTH_STATEGY,
+                    },
                     validate: {
                         params: Joi.object({
                             userId: Joi.number().integer(),
@@ -180,11 +180,20 @@ async function deleteUserHandler(request: Hapi.Request, h: Hapi.ResponseToolkit)
     const userId = parseInt(request.params.userId, 10)
 
     try {
-        await prisma.user.delete({
-            where: {
-                id: userId,
-            },
-        })
+        // Delete all enrollments
+        await prisma.$transaction([
+            prisma.token.deleteMany({
+                where: {
+                    userId: userId,
+                },
+            }),
+            prisma.user.delete({
+                where: {
+                    id: userId,
+                },
+            }),
+        ])
+
         return h.response().code(204)
     } catch (err) {
         console.log(err)

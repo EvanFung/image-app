@@ -175,7 +175,6 @@ async function getImagesHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) 
 async function deleteImageHandler(request: Hapi.Request, h: Hapi.ResponseToolkit) {
     const { prisma } = request.server.app
     const imageId = parseInt(request.params.imageId, 10)
-    const { userId } = request.auth.credentials
 
     try {
         await prisma.image.delete({

@@ -16,15 +16,15 @@ const server: Hapi.Server = Hapi.server({
 })
 export async function createServer(): Promise<Hapi.Server> {
     // Register the logger
-    await server.register({
-        plugin: hapiPino,
-        options: {
-            logEvents: (process.env.CI === 'true' || process.env.TEST === 'true') ? false : undefined,
-            prettyPrint: process.env.NODE_ENV !== 'production',
-            // Redact Authorization headers, see https://getpino.io/#/docs/redaction
-            redact: ['req.headers.authorization'],
-        },
-    })
+    // await server.register({
+    //     plugin: hapiPino,
+    //     options: {
+    //         logEvents: (process.env.CI === 'true' || process.env.TEST === 'true') ? false : undefined,
+    //         prettyPrint: process.env.NODE_ENV !== 'production',
+    //         // Redact Authorization headers, see https://getpino.io/#/docs/redaction
+    //         redact: ['req.headers.authorization'],
+    //     },
+    // })
 
     await server.register([
         hapiAuthJWT,
